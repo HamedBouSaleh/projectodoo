@@ -41,7 +41,7 @@ export default async function handler(req, res) {
           model: 'helpdesk.ticket',
           method: 'create',
           args: [{
-            name: `${issueType} - Order ${orderNumber}`,
+            name: `Order ${orderNumber} : ${issueType} `,
             description: `Customer: ${customerName}\nOrder: ${orderNumber}\nIssue: ${description}`,
             team_id: 1
           }],
