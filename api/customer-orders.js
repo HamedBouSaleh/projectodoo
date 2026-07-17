@@ -44,7 +44,7 @@ export default async function handler(req, res) {
           kwargs: {
             fields: ['name', 'state', 'amount_total', 'date_order'],
             order: 'date_order desc',
-            limit: 100
+            limit: 1000
           }
         },
         id: 1
