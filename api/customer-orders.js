@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const ODOO_URL = 'https://transmed-cx-staging-h-34608506.dev.odoo.com';  
   const DB = 'transmed-cx-staging-h-34608506'; 
   const LOGIN = 'hamed.bousaleh@transmed.com';
-  const PASSWORD = 'YOUR_ACTUAL_PASSWORD'; 
+  const PASSWORD = 'Hamed@2026'; 
   try {    const loginRes = await fetch(`${ODOO_URL}/web/session/authenticate`,
       {      method: 'POST',     
        headers: { 'Content-Type': 'application/json' },     
