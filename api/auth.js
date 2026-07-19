@@ -32,15 +32,16 @@ module.exports = async function handler(req, res) {
     }
 
     return res.status(200).json({
-      success: true,
-      user: {
-        uid: result.uid,
-        name: result.name,
-        email: email,
-        sessionId: result.session_id,
-        partnerId: result.partner_id
-      }
-    });
+  success: true,
+  user: {
+    uid: result.uid,
+    name: result.name,
+    email: email,
+    sessionId: result.session_id,
+    partnerId: result.partner_id,
+    partnerName: result.partner_display_name || result.name
+  }
+});
 
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
