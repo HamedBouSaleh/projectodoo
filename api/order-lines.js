@@ -8,10 +8,10 @@ export default async function handler(req, res){
   const { orderNumber } = req.body;
   if (!orderNumber) return res.status(400).json({ error: 'orderNumber is required' });
 
-  const ODOO_URL = 'https://transmed-cx-staging-h-34608506.dev.odoo.com';
-  const DB = 'transmed-cx-staging-h-34608506';
-  const LOGIN = 'hamed.bousaleh@transmed.com';
-  const PASSWORD = 'Hamed@2026';
+const ODOO_URL = process.env.ODOO_URL;
+const DB = process.env.DB;
+const LOGIN = process.env.LOGIN;
+const PASSWORD = process.env.PASSWORD;
 
   try {
     const loginRes = await fetch(`${ODOO_URL}/web/session/authenticate`, {
