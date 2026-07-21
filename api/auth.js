@@ -10,9 +10,8 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ success: false, error: 'Email and password required' });
   }
 
-  const ODOO_URL = 'https://transmed-cx-staging-h-34608506.dev.odoo.com';
-  const DB = 'transmed-cx-staging-h-34608506';
-
+const ODOO_URL = process.env.ODOO_URL;
+const DB = process.env.DB;
   try {
     const loginRes = await fetch(`${ODOO_URL}/web/session/authenticate`, {
       method: 'POST',
