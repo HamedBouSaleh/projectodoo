@@ -23,7 +23,7 @@ async function customerTopItems(req, res) {
   const groupData = await odooCall(ODOO_URL, sessionId, 'sale.order.line', 'read_group', [
     [
       ['order_id.partner_id.name', 'ilike', customerName],
-      ['order_id.state', 'in', ['sale', 'done']],
+      ['order_id.state', '!=', 'cancel'],
       ['product_id', '!=', false]
     ],
     ['product_uom_qty:sum'],
@@ -44,7 +44,7 @@ async function companyTopItems(req, res) {
 
   const groupData = await odooCall(ODOO_URL, sessionId, 'sale.order.line', 'read_group', [
     [
-      ['order_id.state', 'in', ['sale', 'done']],
+      ['order_id.state', '!=', 'cancel'],
       ['product_id', '!=', false]
     ],
     ['product_uom_qty:sum'],
@@ -53,6 +53,12 @@ async function companyTopItems(req, res) {
 
   const groups = groupData.result;
   if (!groups || groups.length === 0) return res.status(200).json({ found: false });
+
+  return res.status(200).json({
+    found: true,
+    items: groups.map(g => ({ productName: g.product_id ? g.product_id[1] : 'Unknown item', quantity: g.product_uom_qty }))
+  });
+}
 
   return res.status(200).json({
     found: true,
