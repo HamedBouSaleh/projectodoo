@@ -1,4 +1,4 @@
-import { odooAuth, odooCall } from '../lib/odoo.js';
+import { odooAuth, odooCall } from '../odoo.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
