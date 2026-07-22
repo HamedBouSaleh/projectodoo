@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     if (req.body.action === 'update') return await updateAccount(req, res);
-    return await fetchAccount(req, res); // default — matches existing fetch callers
+    return await fetchAccount(req, res); 
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
