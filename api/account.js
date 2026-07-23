@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    if (req.body.action === 'update') return await updateAccount(req, res);
+    if ((req.body||{}).action === 'change-password') return await changePassword(req, res);
     return await fetchAccount(req, res); 
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -44,16 +44,41 @@ async function fetchAccount(req, res) {
   });
 }
 
-async function updateAccount(req, res) {
-  const { partnerId, phone, mobile, street, street2, city } = req.body;
-  if (!partnerId) return res.status(400).json({ error: 'partnerId is required' });
+async function changePassword(req, res) {
+  const { partnerId, currentPassword, newPassword } = req.body;
+  if (!partnerId || !currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'partnerId, currentPassword and newPassword are required' });
+  }
 
   const { ODOO_URL, sessionId } = await odooAuth();
 
-  const writeData = await odooCall(ODOO_URL, sessionId, 'res.partner', 'write',
-    [[partnerId], { phone, mobile, street, street2, city }]);
+  const userLookup = await odooCall(ODOO_URL, sessionId, 'res.users', 'search_read',
+    [[['partner_id', '=', partnerId]]], { fields: ['id', 'login'], limit: 1 });
+  const odooUser = userLookup.result?.[0];
+  if (!odooUser) {
+    return res.status(404).json({ error: 'No linked login found for this account' });
+  }
 
-  if (!writeData.result) return res.status(500).json({ error: 'Update failed', details: writeData });
+  // Verify the current password by attempting to authenticate as that user.
+  const verifyRes = await fetch(`${ODOO_URL}/web/session/authenticate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'call',
+      params: { db: process.env.DB, login: odooUser.login, password: currentPassword }
+    })
+  });
+  const verifyData = await verifyRes.json();
+  if (!verifyData.result?.session_id) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
 
-  return res.status(200).json({ success: true, message: 'Account details updated.' });
+  const writeData = await odooCall(ODOO_URL, sessionId, 'res.users', 'write',
+    [[odooUser.id], { password: newPassword }]);
+  if (!writeData.result) {
+    return res.status(500).json({ error: 'Password update failed', details: writeData });
+  }
+
+  return res.status(200).json({ success: true });
 }
