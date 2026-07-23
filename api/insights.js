@@ -21,7 +21,7 @@ async function topItems(customerName, res, limit) {
   const { ODOO_URL, sessionId } = await odooAuth();
 
   const domain = [
-    ['order_id.state', '!=', 'cancel'],
+    ['order_id.order_status', '!=', 'cancel'],
     ['product_id', '!=', false]
   ];
   if (customerName) domain.push(['order_id.partner_id.name', 'ilike', customerName]);
