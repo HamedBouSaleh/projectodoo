@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   try {
     if ((req.body||{}).action === 'detail') return await orderDetail(req, res);
     if ((req.body||{}).action === 'lines') return await orderLines(req, res);
-    return await listOrders(req, res); // default — matches existing customer-orders callers
+    return await listOrders(req, res); 
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
