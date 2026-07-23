@@ -7,8 +7,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    if (req.body.action === 'detail') return await orderDetail(req, res);
-    if (req.body.action === 'lines') return await orderLines(req, res);
+    if ((req.body||{}).action === 'detail') return await orderDetail(req, res);
+    if ((req.body||{}).action === 'lines') return await orderLines(req, res);
     return await listOrders(req, res); // default — matches existing customer-orders callers
   } catch (error) {
     return res.status(500).json({ error: error.message });
