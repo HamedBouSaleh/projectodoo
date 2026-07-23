@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   try {
     if ((req.body||{}).action === 'detail') return await orderDetail(req, res);
     if ((req.body||{}).action === 'lines') return await orderLines(req, res);
-    return await listOrders(req, res); 
+    return await listOrders(req, res); // default — matches existing customer-orders callers
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -23,17 +23,13 @@ async function listOrders(req, res) {
 
   const ordersData = await odooCall(ODOO_URL, sessionId, 'sale.order', 'search_read',
     [[['partner_id.name', 'ilike', customerName]]],
-    { fields: ['name', 'state', 'amount_total', 'date_order'], order: 'date_order desc', limit: 1000 });
+    { fields: ['name', 'order_status', 'amount_total', 'date_order'], order: 'date_order desc', limit: 1000 });
 
   const orders = ordersData.result;
   if (!orders || orders.length === 0) {
     return res.status(200).json({ found: false, message: `No orders found for customer ${customerName}` });
   }
 
-  const statusMap = {
-    draft: 'Quotation', sent: 'Quotation Sent',
-    sale: 'Order Confirmed', done: 'Delivered', cancel: 'Cancelled'
-  };
   const totalSpend = orders.reduce((sum, o) => sum + o.amount_total, 0);
 
   return res.status(200).json({
@@ -44,7 +40,7 @@ async function listOrders(req, res) {
     currency: 'AED',
     orders: orders.map(o => ({
       orderNumber: o.name,
-      status: statusMap[o.state] || o.state,
+      status: o.order_status || 'unknown', // raw value — frontend maps via ORDER_STATUS_MAP in theme.js
       amount: o.amount_total,
       date: o.date_order
     }))
@@ -59,7 +55,7 @@ async function orderDetail(req, res) {
 
   const orderData = await odooCall(ODOO_URL, sessionId, 'sale.order', 'search_read',
     [[['name', '=', orderNumber]]],
-    { fields: ['name', 'state', 'amount_total', 'date_order', 'partner_id'], limit: 1 });
+    { fields: ['name', 'order_status', 'amount_total', 'date_order', 'partner_id'], limit: 1 });
 
   const orders = orderData.result;
   if (!orders || orders.length === 0) {
@@ -70,7 +66,7 @@ async function orderDetail(req, res) {
   return res.status(200).json({
     found: true,
     orderName: order.name,
-    status: order.state,
+    status: order.order_status || 'unknown',
     totalAmount: order.amount_total,
     orderDate: order.date_order,
     customerName: order.partner_id[1]
