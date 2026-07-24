@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     if ((req.body||{}).action === 'create') return await createFeedback(req, res);
-    return await listFeedback(req, res); // default — matches existing list callers
+    return await listFeedback(req, res); 
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -22,8 +22,7 @@ async function createFeedback(req, res) {
 
   const { ODOO_URL, sessionId } = await odooAuth();
 
-  // Feedback is a helpdesk.ticket, same as complaints — flagged via a
-  // [Feedback] name prefix + category rather than a separate Odoo model.
+
   const partnerLookup = await odooCall(ODOO_URL, sessionId, 'res.partner', 'search_read',
     [[['name', 'ilike', customerName]]], { fields: ['id', 'name'], limit: 1 });
   const partnerId = partnerLookup.result?.[0]?.id || false;
