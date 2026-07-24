@@ -59,7 +59,7 @@ async function changePassword(req, res) {
     return res.status(404).json({ error: 'No linked login found for this account' });
   }
 
-  // Verify the current password by attempting to authenticate as that user.
+
   const verifyRes = await fetch(`${ODOO_URL}/web/session/authenticate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
